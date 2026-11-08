@@ -20,8 +20,8 @@ Edit the "Describe the scenario here" captions in `talk-3min/index.html`.
 ## Filling in results
 
 Slide 8 of the 3-min deck and slide 5 of the 1-min deck show the results. At the bottom of each `index.html`:
-`window.RESULTS` (before/after percent), `window.CURVE` (steps and success rates for the chart), and `window.FAKE=true`.
-**The numbers currently there are fake, for layout preview, and slides show a FAKE DATA badge.** Replace them with real numbers and delete the `window.FAKE` line.
+`window.RESULTS` (before/after percent), `window.CURVE` (steps and success rates for the chart), and optionally `window.FAKE=true` (shows a FAKE DATA badge).
+**The numbers currently there are placeholders, not real results.** Replace them with real numbers.
 
 ## Rebuild
 

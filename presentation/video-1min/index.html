@@ -13,7 +13,6 @@
 <section class="slide center">
   <div class="kicker">Hackathon project</div>
   <h1>Can RSI improve an LLM's understanding of physics?</h1>
-  <p class="sub">Tested on a ball and a wall.</p>
 </section>
 
 <!-- 2. Background + problem -->
@@ -30,8 +29,8 @@
   <div class="flow">
     <div class="box">Model draws<br>the scene</div><div class="arr">→</div>
     <div class="box" style="border-color:var(--orange)">Agent finds<br>failures</div><div class="arr">→</div>
-    <div class="box" style="border-color:var(--orange)">Agent writes data,<br>reward, and trains</div><div class="arr">→</div>
-    <div class="box">Train a small<br>Qwen with RL</div>
+    <div class="box" style="border-color:var(--orange)">Agent writes data,<br>verifiable reward</div><div class="arr">→</div>
+    <div class="box">Train a small Qwen<br>on that reward</div>
   </div>
   <svg viewBox="0 0 1680 110" style="width:100%;height:auto;margin-top:6px">
     <path d="M1560 0 V70 H120 V14" fill="none" stroke="#556" stroke-width="4" stroke-dasharray="10 8"/>
@@ -49,7 +48,7 @@
     <figcaption><b>Correct</b></figcaption></figure>
   <figure class="vf badc abs" style="left:1030px;top:265px;width:560px">
     <div class="vslot sq" data-src="../media/bad_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/bad_1.mp4</div></div></div>
-    <figcaption><b>Failure → becomes a reward</b></figcaption></figure>
+    <figcaption><b>Failure → becomes a reward signal</b></figcaption></figure>
 </section>
 
 <!-- 5. Results -->
@@ -79,7 +78,6 @@
 </div>
 <div class="hint">← → / space to navigate · F fullscreen</div>
 <script>
-window.FAKE=true;  // remove this line when real numbers are in
 window.RESULTS={in_dist:{base:12,rl:71},heldout:{base:8,rl:54}};
 window.CURVE={xlabel:"Training step",steps:[0,10,20,30,40,50,60],in_dist:[12,15,24,38,52,63,71],heldout:[8,9,15,26,38,47,54]};
 </script>

@@ -3,25 +3,25 @@
 About 350 words, roughly 3 minutes. The deck has 8 slides.
 
 **1. Title (10 s)**
-Hi everyone. Can recursive self-improvement, RSI, improve a language model's understanding of physics? That is our question, and we test it on a ball and a wall.
+Hi everyone. Can recursive self-improvement, RSI, improve a language model's understanding of physics? That is our question.
 
-**2. Background (20 s)**
-Something changed with GPT-6: creators are already using it to make videos. This YouTube tutorial says GPT-6 Astra can bulk-create videos. [Point at the screenshot.] People are using these models as video generators, so how physically correct the output is starts to matter.
+**2. Background (15 s)**
+Advanced LLMs can now generate videos that look physically real, and creators are already using them to make videos. [Point at the screenshot.] That makes the physics in those videos matter.
 
 **3. The problem (25 s)** — play clips
 But the motion often breaks the physics. Here are four ways. Newton's laws: a ball drifts sideways though no force acts on it. Energy conservation: each bounce goes higher than the last. Contact: the ball stops at the wall instead of coming back. Momentum: the ball that hits keeps moving after the collision.
 
 **4. Our idea (30 s)**
-So we put an agent in the improvement loop. The agent, Claude, a stronger model, builds the training environment, generates the data, and tunes the reward. It fine-tunes the model automatically from the results, and explores on its own to raise the score. The model draws a scene, the agent finds its failures, writes data and rewards that target them, we train, and the loop repeats from the new model's failures.
+So we put an agent in the improvement loop. The agent, Claude, a stronger model, builds the training environment and generates the data. Most importantly, it writes a verifiable reward: a program that checks the physics, so the score cannot be argued with. That reward is the RL signal we train on. The model draws a scene, the agent finds its failures, writes data and rewards that target them, we train, and the loop repeats from the new model's failures.
 
 **5. Model and training (20 s)**
-The model is a small Qwen instruct model, about one and a half billion parameters. We train it with GRPO and LoRA using Hugging Face TRL. The reward is a physics score from a checker, written and revised by the agent each round, on scenes the agent generates.
+The model is a small Qwen instruct model, about one and a half billion parameters. We train it with GRPO and LoRA using Hugging Face TRL. The reward is verifiable: a checker scores the physics, written and revised by the agent each round, on scenes the agent generates.
 
 **6. Correct examples (20 s)** — play clips
 Four scenarios, each with a correct reference. A ball hits a wall and rebounds at 0.8 of its speed. A ball bounces and each bounce is lower. A block splits in two with total momentum staying zero. Two balls collide and the momentum passes on.
 
 **7. Failure modes (25 s)** — play clips
-And here are typical ways it goes wrong: the ball passes through the wall, turns back before touching it, or comes back faster than it went in. Each one is a rule in our checker and a term in the reward, so the model is pushed away from exactly these mistakes.
+And here are typical ways it goes wrong: the ball passes through the wall, turns back before touching it, or comes back faster than it went in. Each one is a rule in our checker and becomes part of the reward signal, so the model is pushed away from exactly these mistakes.
 
 **8. Results (20 s)**
 After training, success on scenes the model never saw goes from [base] to [after]. Success means no physics rule is broken and contact time, bounce speed, and trajectory are all accurate. With limited resources, a stronger model, Claude, did this for a smaller one, Qwen; the same loop is what a model could run on itself. Thank you.
@@ -38,8 +38,7 @@ Be careful here. The examples on slide 2 are demos and user reports, not benchma
 
 ## Source behind slide 2
 
-- YouTube result: "NEW ChatGPT Astra Can Make VIRAL Faceless Videos (FAST & UNLIMITED)" by Success With Sam, 3.4K views. It is a creator's own claim, and the channel promotes a product, so say "a tutorial says", not "GPT-6 can".
-- Put your screenshot at `media/background_1.png`.
+- YouTube result: "NEW ChatGPT Astra Can Make VIRAL Faceless Videos (FAST & UNLIMITED)" by Success With Sam, 3.4K views. It is a creator's own claim, and the channel promotes a product. The slide makes the general point "advanced LLMs can generate realistic-looking videos" and does not name the model. Screenshot: `media/background_1.png`.
 
 ## Evidence to prepare before presenting
 
