@@ -14,8 +14,8 @@ But the motion often breaks the physics. Here are four ways. Newton's laws: a ba
 **4. Our idea (30 s)**
 So we put an agent in the improvement loop. The agent, Claude, a stronger model, builds the training environment and generates the data. Most importantly, it writes a verifiable reward: a program that checks the physics, so the score cannot be argued with. That reward is the RL signal we train on. The model draws a scene, the agent finds its failures, writes data and rewards that target them, we train, and the loop repeats from the new model's failures.
 
-**5. Model and training (20 s)**
-The model is a small Qwen instruct model, about one and a half billion parameters. We train it with GRPO and LoRA using Hugging Face TRL. The reward is verifiable: a checker scores the physics, written and revised by the agent each round, on scenes the agent generates.
+**5. Model and training (25 s)**
+The model is a small Qwen instruct model, Qwen2.5 at half a billion parameters. Everything around it was built by the agent: the training algorithm, GRPO with LoRA from the TRL library; the environment, a task generator and a physics checker; the data, randomized scenes; and the verifiable reward. An AI agent ran the whole improvement pipeline, and that is the RSI step.
 
 **6. Correct examples (20 s)** — play clips
 Four scenarios, each with a correct reference. A ball hits a wall and rebounds at 0.8 of its speed. A ball bounces and each bounce is lower. A block splits in two with total momentum staying zero. Two balls collide and the momentum passes on.

@@ -109,3 +109,11 @@ svg text{font-family:inherit}
 .kpilabel{font-size:30px;color:var(--muted);margin-top:10px;margin-bottom:34px}
 
 .vslot.sq{aspect-ratio:1/1}
+
+/* training slide: rows built by the agent */
+.kv.tight{gap:14px}
+.kv.tight .r{padding:16px 32px;align-items:center}
+.kv.tight .k{width:230px;font-size:26px}
+.kv.tight .v{font-size:38px;flex:1}
+.kv.tight .v small{font-size:26px;margin-top:2px}
+.by{flex:none;font-size:24px;font-weight:700;letter-spacing:.06em;color:#ffa13d;border:2px solid #ffa13d;border-radius:999px;padding:6px 20px;background:rgba(255,161,61,.08)}
