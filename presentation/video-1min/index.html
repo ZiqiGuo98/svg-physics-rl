@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can RSI Improve LLM Physics (1 min)</title>
+<link rel="stylesheet" href="../shared/deck.css">
+</head>
+<body>
+<div id="stage">
+
+<!-- 1. Hook -->
+<section class="slide center">
+  <div class="kicker">Hackathon project</div>
+  <h1>Can RSI improve an LLM's understanding of physics?</h1>
+  <p class="sub">Tested on a ball and a wall.</p>
+</section>
+
+<!-- 2. Background + problem -->
+<section class="slide center">
+  <div class="kicker">The problem</div>
+  <div class="big">AI-generated scenes look real, but their motion often <span class="hl">breaks the physics</span>.</div>
+  <p class="sub">Newton's laws. Energy conservation. Long videos.</p>
+</section>
+
+<!-- 3. Idea -->
+<section class="slide">
+  <div class="kicker">Our idea</div>
+  <h2>Put an agent in the improvement loop.</h2>
+  <div class="flow">
+    <div class="box">Model draws<br>the scene</div><div class="arr">→</div>
+    <div class="box" style="border-color:var(--orange)">Agent finds<br>failures</div><div class="arr">→</div>
+    <div class="box" style="border-color:var(--orange)">Agent writes data,<br>reward, and trains</div><div class="arr">→</div>
+    <div class="box">Train a small<br>Qwen with RL</div>
+  </div>
+  <svg viewBox="0 0 1680 110" style="width:100%;height:auto;margin-top:6px">
+    <path d="M1560 0 V70 H120 V14" fill="none" stroke="#556" stroke-width="4" stroke-dasharray="10 8"/>
+    <path d="M104 26 L120 4 L136 26" fill="none" stroke="#556" stroke-width="4"/>
+    <text x="840" y="48" text-anchor="middle" font-size="30" fill="#9aa3b2">repeat with the new model's failures</text>
+  </svg>
+</section>
+
+<!-- 4. Examples (two square clips; positions used by build.py) -->
+<section class="slide">
+  <div class="kicker">Examples</div>
+  <h2>A correct bounce, and a failure we catch.</h2>
+  <figure class="vf good abs" style="left:330px;top:265px;width:560px">
+    <div class="vslot sq" data-src="../media/good_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/good_1.mp4</div></div></div>
+    <figcaption><b>Correct</b></figcaption></figure>
+  <figure class="vf badc abs" style="left:1030px;top:265px;width:560px">
+    <div class="vslot sq" data-src="../media/bad_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/bad_1.mp4</div></div></div>
+    <figcaption><b>Failure → becomes a reward</b></figcaption></figure>
+</section>
+
+<!-- 5. Results -->
+<section class="slide">
+  <div class="kicker">Results</div>
+  <h2>Success rate on cases it never saw.</h2>
+  <div class="row" style="gap:48px;align-items:center">
+    <div class="col" style="flex:.8">
+      <div class="kpi" data-kpi="heldout"></div>
+      <div class="kpilabel">Held-out scenes, before → after training</div>
+      <div class="kpi" data-kpi="in_dist" style="font-size:80px"></div>
+      <div class="kpilabel" style="margin-bottom:0">In-distribution scenes</div>
+    </div>
+    <div class="col" style="flex:1.2">
+      <div class="card" style="padding:22px 26px"><div class="curve"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Close -->
+<section class="slide center">
+  <div class="kicker">Takeaway</div>
+  <div class="big">A stronger model improved a weaker one, automatically.</div>
+  <p class="sub">Next: a model improving itself.</p>
+</section>
+
+<div class="pn" id="pn"></div>
+</div>
+<div class="hint">← → / space to navigate · F fullscreen</div>
+<script>
+window.FAKE=true;  // remove this line when real numbers are in
+window.RESULTS={in_dist:{base:12,rl:71},heldout:{base:8,rl:54}};
+window.CURVE={xlabel:"Training step",steps:[0,10,20,30,40,50,60],in_dist:[12,15,24,38,52,63,71],heldout:[8,9,15,26,38,47,54]};
+</script>
+<script src="../shared/deck.js"></script>
+</body>
+</html>

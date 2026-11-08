@@ -1,0 +1,30 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "overlays": {
+    "4": [
+      {
+        "file": "good_1.mp4",
+        "x": 330,
+        "y": 265,
+        "w": 560,
+        "h": 560
+      },
+      {
+        "file": "bad_1.mp4",
+        "x": 1030,
+        "y": 265,
+        "w": 560,
+        "h": 560
+      }
+    ]
+  },
+  "slides": [
+    "Can recursive self-improvement, R S I, improve a language model's understanding of physics?",
+    "AI can now generate scenes that look remarkably real. But the motion often breaks the physics: Newton's laws, energy conservation, whether a ball bounces back off a wall, and whether that holds in a long video.",
+    "So we put a stronger model in the loop. Claude builds the training environment, generates the data, tunes the reward, and fine-tunes a smaller Qwen model automatically from the results, exploring on its own to improve it.",
+    "Here is a correct bounce off a wall, and a failure we catch: the ball passes straight through. Every failure becomes part of the reward.",
+    "Here is the success rate on cases the model has never seen, over the course of training.",
+    "A stronger model improved a weaker one, automatically. The same loop could one day let a model improve itself. Thank you."
+  ]
+}

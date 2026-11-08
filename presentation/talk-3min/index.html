@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can RSI Improve LLM Physics (3 min)</title>
+<link rel="stylesheet" href="../shared/deck.css">
+</head>
+<body>
+<div id="stage">
+
+<!-- 1. Title -->
+<section class="slide center">
+  <div class="kicker">Hackathon project</div>
+  <h1>Can RSI improve an LLM's understanding of physics?</h1>
+  <p class="sub">A stronger model improving a weaker one, tested on a ball and a wall.</p>
+</section>
+
+<!-- 2. Background -->
+<section class="slide">
+  <div class="kicker">Background</div>
+  <h2>Generated scenes now look strikingly real.</h2>
+  <div class="evi" style="margin-bottom:28px;padding:22px 34px">
+    <h3 class="blue" style="font-size:34px">Precise objects from a prompt</h3>
+    <p style="font-size:30px">GPT-6 Astra users report a detailed PlayStation 4 controller in about 12 minutes, and an Xbox Series X in 30.</p>
+    <div class="src" style="font-size:22px;margin-top:6px">X trending summary (Grok-generated), Sep 5, 2026</div>
+  </div>
+  <div class="vgrid" style="gap:32px">
+    <figure class="vf"><div class="vslot" data-src="../media/x_post_1.png"><div class="ph"><div class="t">X POST</div><div class="f">media/x_post_1.png</div></div></div></figure>
+    <figure class="vf"><div class="vslot" data-src="../media/x_post_2.png"><div class="ph"><div class="t">EXAMPLE</div><div class="f">media/x_post_2.png</div><div class="d">another post, demo, or generated image</div></div></div></figure>
+  </div>
+</section>
+
+<!-- 3. Problem -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h2>But the motion often breaks the physics.</h2>
+  <div class="row" style="gap:44px">
+    <div class="col" style="flex:1">
+      <div class="tile r" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Newton's laws</h3><p style="font-size:28px">Speed changes for no reason.</p></div>
+      <div class="tile o" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Energy conservation</h3><p style="font-size:28px">A bounce returns more energy than went in.</p></div>
+      <div class="tile" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Contact</h3><p style="font-size:28px">Does the ball come back off the wall, or pass through?</p></div>
+      <div class="tile v" style="padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Long videos</h3><p style="font-size:28px">Errors accumulate, so physics can drift over time.</p></div>
+    </div>
+    <div class="col" style="flex:1.25">
+      <figure class="vf badc"><div class="vslot" data-src="../media/phys_fail.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/phys_fail.mp4</div><div class="d">a generated video that breaks the physics</div></div></div>
+        <figcaption><b>Our finding</b>Describe the video and what is wrong</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Idea: agent loop -->
+<section class="slide">
+  <div class="kicker">Our idea</div>
+  <h2>Put an agent in the improvement loop.</h2>
+  <div class="flow">
+    <div class="box">Model draws<br>the scene</div><div class="arr">→</div>
+    <div class="box" style="border-color:var(--orange)">Agent finds<br>failures</div><div class="arr">→</div>
+    <div class="box" style="border-color:var(--orange)">Agent writes data<br>and reward</div><div class="arr">→</div>
+    <div class="box">Train the<br>model with RL</div>
+  </div>
+  <svg viewBox="0 0 1680 110" style="width:100%;height:auto;margin-top:6px">
+    <path d="M1560 0 V70 H120 V14" fill="none" stroke="#556" stroke-width="4" stroke-dasharray="10 8"/>
+    <path d="M104 26 L120 4 L136 26" fill="none" stroke="#556" stroke-width="4"/>
+    <text x="840" y="48" text-anchor="middle" font-size="30" fill="#9aa3b2">repeat, starting from the improved model's new failures</text>
+  </svg>
+  <ul style="margin-top:20px">
+    <li>The agent, a stronger model (Claude), builds the training environment.</li>
+    <li>It generates the data and tunes the reward.</li>
+    <li>It fine-tunes the model automatically from the results, and explores on its own to raise the score.</li>
+  </ul>
+</section>
+
+<!-- 5. Model and training -->
+<section class="slide">
+  <div class="kicker">Model and training</div>
+  <h2>Small model, reinforcement learning.</h2>
+  <div class="kv">
+    <div class="r"><div class="k">Model</div><div class="v">Small Qwen instruct model<small>Qwen2.5-0.5B-Instruct</small></div></div>
+    <div class="r"><div class="k">Algorithm</div><div class="v">GRPO with LoRA<small>Hugging Face TRL</small></div></div>
+    <div class="r"><div class="k">Reward</div><div class="v">Physics score from a checker<small>Written and revised by the agent each round</small></div></div>
+    <div class="r"><div class="k">Data</div><div class="v">Randomized ball and wall scenes<small>Generated by the agent</small></div></div>
+  </div>
+</section>
+
+<!-- 6. Correct examples -->
+<section class="slide">
+  <div class="kicker">Examples</div>
+  <h2>What correct physics looks like.</h2>
+  <div class="vgrid" style="gap:28px">
+    <figure class="vf good"><div class="vslot sq" data-src="../media/good_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/good_1.mp4</div></div></div>
+      <figcaption style="font-size:26px"><b style="font-size:30px">Ball hits a wall</b>Rebounds at 0.8× its speed</figcaption></figure>
+    <figure class="vf good"><div class="vslot sq" data-src="../media/good_2.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/good_2.mp4</div></div></div>
+      <figcaption style="font-size:26px"><b style="font-size:30px">Ball bounces</b>Bounce heights decay</figcaption></figure>
+    <figure class="vf good"><div class="vslot sq" data-src="../media/good_3.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/good_3.mp4</div></div></div>
+      <figcaption style="font-size:26px"><b style="font-size:30px">Block splits</b>Momentum stays zero</figcaption></figure>
+    <figure class="vf good"><div class="vslot sq" data-src="../media/good_4.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/good_4.mp4</div></div></div>
+      <figcaption style="font-size:26px"><b style="font-size:30px">Two balls collide</b>Momentum passes on</figcaption></figure>
+  </div>
+</section>
+
+<!-- 7. Failure modes -> rewards -->
+<section class="slide">
+  <div class="kicker">Failure modes</div>
+  <h2>Each failure becomes a reward.</h2>
+  <div class="vgrid" style="gap:40px">
+    <figure class="vf badc"><div class="vslot sq" data-src="../media/bad_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/bad_1.mp4</div></div></div>
+      <figcaption style="font-size:28px"><b style="font-size:32px">Passes through the wall</b>→ penetration is a hard violation</figcaption></figure>
+    <figure class="vf badc"><div class="vslot sq" data-src="../media/bad_2.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/bad_2.mp4</div></div></div>
+      <figcaption style="font-size:28px"><b style="font-size:32px">Turns back early</b>→ must reach the wall</figcaption></figure>
+    <figure class="vf badc"><div class="vslot sq" data-src="../media/bad_3.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/bad_3.mp4</div></div></div>
+      <figcaption style="font-size:28px"><b style="font-size:32px">Bounces back faster</b>→ energy gain is penalized</figcaption></figure>
+  </div>
+</section>
+
+<!-- 8. Results -->
+<section class="slide">
+  <div class="kicker">Results</div>
+  <h2>Success rate on cases it never saw.</h2>
+  <div class="row" style="gap:40px">
+    <div class="col" style="flex:.95">
+      <div class="card" style="padding:28px 34px;margin-bottom:26px">
+        <div class="kpilabel" style="margin:0 0 8px">Held-out scenes, before → after training</div>
+        <div class="kpi" data-kpi="heldout"></div>
+      </div>
+      <div class="card" style="padding:20px 26px">
+        <table>
+          <tr><th></th><th class="n">In-distribution</th><th class="n">Held-out</th></tr>
+          <tr><td>Base model</td><td data-r="in_dist.base"></td><td data-r="heldout.base"></td></tr>
+          <tr><td>After training</td><td data-r="in_dist.rl"></td><td data-r="heldout.rl"></td></tr>
+        </table>
+      </div>
+      <p class="src" style="font-size:23px">Success: no physics rule broken, and contact time, bounce speed, and trajectory all accurate. 200 scenes per set.</p>
+    </div>
+    <div class="col" style="flex:1.05">
+      <div class="card" style="padding:22px 26px"><div class="curve"></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="pn" id="pn"></div>
+</div>
+<div class="hint">← → / space to navigate · F fullscreen</div>
+<script>
+window.FAKE=true;  // remove this line when real numbers are in
+window.RESULTS={in_dist:{base:12,rl:71},heldout:{base:8,rl:54}};
+window.CURVE={xlabel:"Training step",steps:[0,10,20,30,40,50,60],in_dist:[12,15,24,38,52,63,71],heldout:[8,9,15,26,38,47,54]};
+</script>
+<script src="../shared/deck.js"></script>
+</body>
+</html>
