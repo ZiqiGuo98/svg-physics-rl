@@ -1,0 +1,7 @@
+torch
+transformers
+trl
+peft
+datasets
+accelerate
+# optional, CUDA only: vllm
