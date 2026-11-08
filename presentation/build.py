@@ -13,7 +13,7 @@ Video mode needs Kokoro (pip install kokoro soundfile; brew install espeak-ng),
 ffmpeg and Google Chrome. Run inside the venv that has kokoro, with
 PHONEMIZER_ESPEAK_LIBRARY and ESPEAK_DATA_PATH pointing at Homebrew espeak-ng.
 """
-import argparse, json, shutil, subprocess
+import argparse, base64, json, mimetypes, re, shutil, subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -54,9 +54,29 @@ def tts(texts, voice, speed, outdir):
         print(f"tts {i:02d}: {len(audio)/24000:.1f}s")
 
 
+def build_standalone(deck):
+    """Single-file HTML: CSS, JS, images and videos inlined, so it works in any viewer."""
+    html = (deck / "index.html").read_text()
+    css = (ROOT / "shared" / "deck.css").read_text()
+    js = (ROOT / "shared" / "deck.js").read_text()
+    html = html.replace('<link rel="stylesheet" href="../shared/deck.css">', f"<style>\n{css}\n</style>")
+    html = html.replace('<script src="../shared/deck.js"></script>', f"<script>\n{js}\n</script>")
+
+    def inline(m):
+        f = (deck / m.group(1)).resolve()
+        if not f.exists():
+            return m.group(0)          # missing file keeps its placeholder
+        mime = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
+        return f'data-src="data:{mime};base64,{base64.b64encode(f.read_bytes()).decode()}"'
+    html = re.sub(r'data-src="(\.\./media/[^"]+)"', inline, html)
+    out = deck / "standalone.html"
+    out.write_text(html)
+    print("wrote", out, f"{out.stat().st_size/1e6:.1f} MB")
+
+
 def build_pdf(deck):
     out = deck / "deck.pdf"
-    chrome(["--no-pdf-header-footer", f"--print-to-pdf={out}", (deck / "index.html").as_uri() + "?clean"])
+    chrome(["--no-pdf-header-footer", "--virtual-time-budget=8000", f"--print-to-pdf={out}", (deck / "index.html").as_uri() + "?clean"])
     print("wrote", out)
 
 
@@ -124,5 +144,6 @@ if __name__ == "__main__":
     a = ap.parse_args()
     d = (ROOT / a.deck).resolve()
     build_pdf(d)
+    build_standalone(d)
     if a.video:
         build_video(d, a.skip_tts)

@@ -63,7 +63,7 @@ if(window.FAKE){
 const vids=[];
 document.querySelectorAll('.vslot[data-src]').forEach(slot=>{
   const src=slot.dataset.src;
-  if(/\.(png|jpe?g|gif|webp|svg)$/i.test(src)){
+  if(/^data:image\//.test(src)||/\.(png|jpe?g|gif|webp|svg)$/i.test(src)){
     const im=document.createElement('img');
     im.addEventListener('load',()=>slot.classList.add('has'));
     im.addEventListener('error',()=>slot.classList.remove('has'));
@@ -71,9 +71,9 @@ document.querySelectorAll('.vslot[data-src]').forEach(slot=>{
   }
   const v=document.createElement('video');
   v.muted=true;v.loop=true;v.playsInline=true;v.preload='auto';
-  v.addEventListener('loadeddata',()=>slot.classList.add('has'));
+  v.addEventListener('loadeddata',()=>{slot.classList.add('has');if(qs.has('clean'))try{v.currentTime=2.5}catch(e){}});
   v.addEventListener('error',()=>slot.classList.remove('has'));
-  v.src=src;
+  v.src=(qs.has('clean')&&!src.startsWith('data:'))?src+'#t=2.5':src;
   slot.appendChild(v);vids.push({v,slide:slot.closest('.slide')});
 });
 function syncVideos(){vids.forEach(({v,slide})=>{if(slide===slides[cur]){v.play().catch(()=>{})}else{v.pause()}})}

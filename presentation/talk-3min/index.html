@@ -13,40 +13,43 @@
 <section class="slide center">
   <div class="kicker">Hackathon project</div>
   <h1>Can RSI improve an LLM's understanding of physics?</h1>
-  <p class="sub">A stronger model improving a weaker one, tested on a ball and a wall.</p>
+  <p class="sub">Tested on a ball and a wall.</p>
 </section>
 
 <!-- 2. Background -->
 <section class="slide">
   <div class="kicker">Background</div>
-  <h2>Generated scenes now look strikingly real.</h2>
-  <div class="evi" style="margin-bottom:28px;padding:22px 34px">
-    <h3 class="blue" style="font-size:34px">Precise objects from a prompt</h3>
-    <p style="font-size:30px">GPT-6 Astra users report a detailed PlayStation 4 controller in about 12 minutes, and an Xbox Series X in 30.</p>
-    <div class="src" style="font-size:22px;margin-top:6px">X trending summary (Grok-generated), Sep 5, 2026</div>
+  <h2>Creators now make videos with GPT-6.</h2>
+  <div class="evi" style="margin-bottom:30px;padding:26px 38px">
+    <h3 class="blue" style="font-size:40px;margin-bottom:10px">GPT-6 Astra for video</h3>
+    <p style="font-size:34px;line-height:1.4">A YouTube tutorial says GPT-6 Astra can bulk-create faceless YouTube videos.</p>
   </div>
-  <div class="vgrid" style="gap:32px">
-    <figure class="vf"><div class="vslot" data-src="../media/x_post_1.png"><div class="ph"><div class="t">X POST</div><div class="f">media/x_post_1.png</div></div></div></figure>
-    <figure class="vf"><div class="vslot" data-src="../media/x_post_2.png"><div class="ph"><div class="t">EXAMPLE</div><div class="f">media/x_post_2.png</div><div class="d">another post, demo, or generated image</div></div></div></figure>
-  </div>
+  <figure class="vf"><div class="vslot" data-src="../media/background_1.png" style="aspect-ratio:1934/532"><div class="ph"><div class="t">IMAGE</div><div class="f">media/background_1.png</div></div></div></figure>
 </section>
 
 <!-- 3. Problem -->
 <section class="slide">
   <div class="kicker">The problem</div>
   <h2>But the motion often breaks the physics.</h2>
-  <div class="row" style="gap:44px">
-    <div class="col" style="flex:1">
-      <div class="tile r" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Newton's laws</h3><p style="font-size:28px">Speed changes for no reason.</p></div>
-      <div class="tile o" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Energy conservation</h3><p style="font-size:28px">A bounce returns more energy than went in.</p></div>
-      <div class="tile" style="margin-bottom:16px;padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Contact</h3><p style="font-size:28px">Does the ball come back off the wall, or pass through?</p></div>
-      <div class="tile v" style="padding:18px 28px"><h3 style="font-size:34px;margin-bottom:4px">Long videos</h3><p style="font-size:28px">Errors accumulate, so physics can drift over time.</p></div>
+  <div class="vgrid" style="gap:28px;align-items:flex-start">
+    <div class="vf">
+      <div class="tile r" style="padding:16px 22px;margin-bottom:16px"><h3 style="font-size:32px;margin-bottom:4px">Newton's laws</h3><p style="font-size:25px;line-height:1.3">A ball drifts sideways with no force.</p></div>
+      <div class="vslot sq" data-src="../media/viol_1.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/viol_1.mp4</div></div></div>
     </div>
-    <div class="col" style="flex:1.25">
-      <figure class="vf badc"><div class="vslot" data-src="../media/phys_fail.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/phys_fail.mp4</div><div class="d">a generated video that breaks the physics</div></div></div>
-        <figcaption><b>Our finding</b>Describe the video and what is wrong</figcaption></figure>
+    <div class="vf">
+      <div class="tile o" style="padding:16px 22px;margin-bottom:16px"><h3 style="font-size:32px;margin-bottom:4px">Energy conservation</h3><p style="font-size:25px;line-height:1.3">Each bounce goes higher than the last.</p></div>
+      <div class="vslot sq" data-src="../media/viol_2.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/viol_2.mp4</div></div></div>
+    </div>
+    <div class="vf">
+      <div class="tile " style="padding:16px 22px;margin-bottom:16px"><h3 style="font-size:32px;margin-bottom:4px">Contact</h3><p style="font-size:25px;line-height:1.3">The ball stops at the wall and does not come back.</p></div>
+      <div class="vslot sq" data-src="../media/viol_3.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/viol_3.mp4</div></div></div>
+    </div>
+    <div class="vf">
+      <div class="tile v" style="padding:16px 22px;margin-bottom:16px"><h3 style="font-size:32px;margin-bottom:4px">Momentum</h3><p style="font-size:25px;line-height:1.3">The hitting ball keeps going after a collision.</p></div>
+      <div class="vslot sq" data-src="../media/viol_4.mp4"><div class="ph"><div class="t">VIDEO</div><div class="f">media/viol_4.mp4</div></div></div>
     </div>
   </div>
+  <p class="src" style="margin-top:22px;font-size:24px">Example violations, each flagged by a check.</p>
 </section>
 
 <!-- 4. Idea: agent loop -->
