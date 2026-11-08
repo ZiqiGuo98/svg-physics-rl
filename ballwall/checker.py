@@ -39,16 +39,16 @@ CATEGORIES: List[str] = [
     "trajectory",
     "success",
 ]
-CATEGORY_ZH = {
-    "format": "格式失败",
-    "teleport_out_static": "瞬移/越界/不动",
-    "penetration": "穿墙",
-    "no_reach_or_no_rebound": "未到墙或未反弹",
-    "energy_gain": "能量增加",
-    "contact_time": "撞墙时刻偏差",
-    "restitution": "反弹速度比偏差",
-    "trajectory": "轨迹偏差",
-    "success": "成功",
+CATEGORY_LABEL = {
+    "format": "Format failure",
+    "teleport_out_static": "Teleport / out of bounds / static",
+    "penetration": "Wall penetration",
+    "no_reach_or_no_rebound": "Did not reach wall or no rebound",
+    "energy_gain": "Energy gain",
+    "contact_time": "Contact-time error",
+    "restitution": "Restitution error",
+    "trajectory": "Trajectory error",
+    "success": "Success",
 }
 
 FORBIDDEN_TAGS = {"animate", "animatemotion", "animatetransform", "set", "script", "use", "foreignobject", "style"}

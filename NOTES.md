@@ -1,34 +1,34 @@
-# 实现记录(偏离、调参、实际环境)
+# Implementation Notes (deviations, tuning, actual environment)
 
-按 `IMPLEMENTATION_PLAN.md` 第 0 节要求,所有偏离和调参都记在这里。日期 2026-11-07。
+As required by section 0 of `IMPLEMENTATION_PLAN.md`, all deviations and parameter tuning are recorded here. Date: 2026-11-07.
 
-## 实际环境
+## Actual environment
 
-| 项目 | 值 |
+| Item | Value |
 |---|---|
-| 机器 | Windows 11 笔记本,NVIDIA RTX 3050 Ti Laptop GPU(4 GB 显存),i7-11370H,32 GB 内存 |
-| Python | 3.14.0(上级目录 `aie-hackathon/.venv`,不是计划建议的 3.10/3.11;所需轮子都能装上) |
-| 库版本 | torch 2.9.1+cu128,transformers 5.22.2,trl 1.17.1,peft 0.21.2 |
-| vLLM | 未安装(Windows) |
+| Machine | Windows 11 laptop, NVIDIA RTX 3050 Ti Laptop GPU (4 GB VRAM), i7-11370H, 32 GB RAM |
+| Python | 3.14.0 (parent directory `aie-hackathon/.venv`, not the 3.10/3.11 suggested by the plan; all required wheels install fine) |
+| Library versions | torch 2.9.1+cu128, transformers 5.22.2, trl 1.17.1, peft 0.21.2 |
+| vLLM | Not installed (Windows) |
 
-核心模块 `ballwall/` 只用标准库,`python -I scripts/selftest.py` 用系统 Python 也能跑。
+The core module `ballwall/` uses only the standard library; `python -I scripts/selftest.py` also runs with the system Python.
 
-## 第 1–3 步:生成器、评分器、自检
+## Steps 1–3: generator, grader, self-check
 
-- 数据:`python scripts/make_data.py`(seed 0;train 2000、eval_in 200、eval_heldout 200;三个集合种子分别为 1、2、3)。参数范围与计划第 3.1 节一致,接触帧 4.30–10.70,小数部分 0.10–0.90。
-- 题目多了一个 `id` 字段(如 `eval_in-00007`),方便抽查;评分不使用它。
-- 自检全部通过,结果在 `outputs/selftest.md`。
-- 一条警告,未改容差:`fixed_e05` 在 eval_in 上成功率 12.5%,超过计划设的 10% 警戒线。原因不是漏洞:恢复系数容差 8% 意味着真实 e 落在 0.463–0.543 的题,固定猜 0.5 就会判成功;这个区间约占训练分布 [0.30, 0.85] 的 15%。收紧 `e_rel` 会让 `slight_e`(e×1.04)开始失败,所以保留默认值。同理,heldout 上 `mirror_e1` 成功 25.5% 是因为 e ≥ 0.926 的题与 e=1 的差距在 8% 以内,计划已预期。
-- 额外加的解析用例:科学计数法 `1e2`、截断的 SVG(没有 `</svg>`)都判格式失败;包在 ```` ```svg ```` 代码块里的正确答案仍判成功。
-- 帧里 ball 的识别规则:`class` 按空格切分后含 `ball`(不是子串匹配)。
+- Data: `python scripts/make_data.py` (seed 0; train 2000, eval_in 200, eval_heldout 200; the three sets use seeds 1, 2, and 3 respectively). Parameter ranges match plan section 3.1: contact frame 4.30–10.70, fractional part 0.10–0.90.
+- Tasks gained an extra `id` field (e.g. `eval_in-00007`) for convenient spot checks; grading does not use it.
+- All self-checks pass; results are in `outputs/selftest.md`.
+- One warning, tolerance left unchanged: `fixed_e05` has a 12.5% success rate on eval_in, above the 10% alert line set in the plan. The cause is not a bug: the 8% coefficient-of-restitution tolerance means that for tasks whose true e falls in 0.463–0.543, a fixed guess of 0.5 is judged a success; that interval covers about 15% of the in-distribution range [0.30, 0.85]. Tightening `e_rel` would make `slight_e` (e×1.04) start failing, so the default is kept. Likewise, `mirror_e1` succeeding 25.5% on held-out is because tasks with e ≥ 0.926 are within 8% of e=1, which the plan already anticipated.
+- Extra parsing test cases added: scientific notation `1e2` and a truncated SVG (no `</svg>`) are both judged format failures; a correct answer wrapped in a ```` ```svg ```` code block is still judged a success.
+- Rule for identifying the ball in a frame: `class`, split on whitespace, contains `ball` (not substring matching).
 
-## 评测脚本的实现细节
+## Implementation details of the evaluation script
 
-- 贪心解码,左侧 padding,`stop_strings=["</svg>"]`:生成到第一个 `</svg>` 就停,评分器本来也只读第一个 svg 元素,这只省时间,不改变得分。训练时 TRL 不传这个参数。
-- LoRA 评测时先 `merge_and_unload()` 再生成,加快速度。
-- `--sample_k` 探针同时算 `low` 和 `zero` 两种 violation_mode 下的零方差组比例,供第 7 节的决策用。
-- `collect_curve.py` 只收 `outputs/eval/step*.json`,避免把其他模型的一次性评测画进训练曲线。
+- Greedy decoding, left padding, `stop_strings=["</svg>"]`: generation stops at the first `</svg>`. The grader only reads the first svg element anyway, so this only saves time and does not change the score. During training, TRL is not passed this parameter.
+- For LoRA evaluation, `merge_and_unload()` is called before generation to speed it up.
+- The `--sample_k` probe computes the fraction of zero-variance groups under both the `low` and `zero` violation_mode, for the decision in section 7.
+- `collect_curve.py` collects only `outputs/eval/step*.json`, to avoid drawing one-off evaluations of other models into the training curve.
 
-## 第 4 步以后
+## Step 4 onward
 
-见下文追加的记录。
+See the records appended below.

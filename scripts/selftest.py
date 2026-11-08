@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from ballwall.baselines import GOOD, PRINT_ONLY, STRATEGIES, VIOLATING  # noqa: E402
-from ballwall.checker import CATEGORY_ZH, score  # noqa: E402
+from ballwall.checker import CATEGORY_LABEL, score  # noqa: E402
 from ballwall.metrics import summarize  # noqa: E402
 from ballwall.task import read_jsonl, render_svg, truth_xs  # noqa: E402
 
@@ -79,12 +79,12 @@ def main() -> None:
 
     # 2. strategies table
     print("\n== 2. dumb strategies")
-    md = ["# 评分器自检结果", "", f"violation_mode = `{args.violation_mode}`", ""]
+    md = ["# Grader self-check results", "", f"violation_mode = `{args.violation_mode}`", ""]
     table = {}
     js = {"violation_mode": args.violation_mode, "strategies": {}, "robustness": [], "failures": FAILURES}
     for name in ("eval_in", "eval_heldout"):
         tasks = sets[name]
-        md += [f"## {name}({len(tasks)} 题)", "", "| 策略 | 成功率 | 平均 reward | 最常见类别 | 硬约束通过率 |", "|---|---:|---:|---|---:|"]
+        md += [f"## {name} ({len(tasks)} tasks)", "", "| Strategy | Success rate | Mean reward | Most common category | Hard-constraint pass rate |", "|---|---:|---:|---|---:|"]
         print(f"\n{name}: {'strategy':18s} {'success':>8s} {'reward':>8s}  {'hard_ok':>7s}  top category")
         for sname, fn in STRATEGIES.items():
             rng = random.Random(12345)
@@ -97,7 +97,7 @@ def main() -> None:
                 "top_count": cnt, "hard_ok_rate": 1 - s["format_fail_rate"] - s["hard_violation_rate"],
                 "category_dist": s["category_dist"]}
             print(f"{'':10s}{sname:18s} {s['success_rate']:8.1%} {s['mean_reward']:8.3f}  {1 - s['format_fail_rate'] - s['hard_violation_rate']:7.1%}  {top} ({cnt})")
-            md.append(f"| `{sname}` | {s['success_rate']:.1%} | {s['mean_reward']:.3f} | {CATEGORY_ZH[top]}({cnt}/{len(tasks)}) | "
+            md.append(f"| `{sname}` | {s['success_rate']:.1%} | {s['mean_reward']:.3f} | {CATEGORY_LABEL[top]}({cnt}/{len(tasks)}) | "
                       f"{1 - s['format_fail_rate'] - s['hard_violation_rate']:.1%} |")
         md.append("")
 
@@ -131,18 +131,18 @@ def main() -> None:
     # 5. parser robustness
     print("\n== 5. parser robustness (each must be a format failure)")
     t0 = sets["eval_in"][0]
-    md += ["## 解析健壮性用例(都必须判为格式失败)", "", "| 用例 | 结果 | 原因 |", "|---|---|---|"]
+    md += ["## Parsing robustness cases (all must be judged format failures)", "", "| Case | Result | Reason |", "|---|---|---|"]
     for cname, text in robustness_cases(t0).items():
         res = score(text, t0, args.violation_mode)
         ok = res["category"] == "format" and res["reward"] == 0.0
         check(ok, f"{cname}: {res['category']} ({res['reason']})")
         js["robustness"].append({"case": cname, "blocked": ok, "reason": res["reason"]})
-        md.append(f"| {cname} | {'格式失败' if ok else '**未拦截:' + res['category'] + '**'} | {res['reason'].replace('|', '/')} |")
+        md.append(f"| {cname} | {'Format failure' if ok else '**Not caught: ' + res['category'] + '**'} | {res['reason'].replace('|', '/')} |")
     # sanity: the untouched answer, fenced in markdown, still parses
     fenced = "```svg\n" + render_svg(t0, truth_xs(t0)) + "\n```"
     check(score(fenced, t0)["success"], "oracle answer wrapped in a ```svg fence still succeeds")
 
-    md += ["", f"自检结论:{'全部通过' if not FAILURES else '有 %d 项未通过' % len(FAILURES)}", ""]
+    md += ["", f"Self-check conclusion: {'all passed' if not FAILURES else '%d item(s) failed' % len(FAILURES)}", ""]
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(md), encoding="utf-8")

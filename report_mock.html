@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>球撞墙评测报告(示例数据)</title>
+<title>Ball-Wall Collision Evaluation Report (Sample Data)</title>
 <style>
   :root{
     --bg:#fafaf8; --fg:#1d1d1b; --muted:#6b6b66; --card:#ffffff; --line:#e4e3de; --grid:#ececE7;
@@ -33,7 +33,7 @@
   .kpi .n{font-size:1.8rem;font-weight:700;line-height:1.1}
   .kpi .l{color:var(--muted);font-size:.9rem;margin-top:4px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;position:relative;overflow:hidden}
-  .card.mock::after{content:"示例数据";position:absolute;right:10px;top:8px;font-size:.72rem;letter-spacing:.08em;color:var(--warn-fg);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:6px;padding:1px 6px}
+  .card.mock::after{content:"Sample data";position:absolute;right:10px;top:8px;font-size:.72rem;letter-spacing:.08em;color:var(--warn-fg);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:6px;padding:1px 6px}
   figure{margin:0}
   figcaption{color:var(--muted);font-size:.9rem;margin-top:6px}
   svg{width:100%;height:auto;display:block}
@@ -59,194 +59,194 @@
 <body>
 <div class="wrap">
 
-<p class="sub">黑客松项目 · 结果报告模板</p>
-<h1>球撞墙:模型不借助代码,能否逐帧画出正确的碰撞过程?</h1>
-<p class="sub">任务:模型直接输出逐帧静态 SVG;评分器按 id 抽取球的坐标,先检查硬约束(穿墙等),再比较软精度(撞墙时刻、反弹速度比、轨迹)。</p>
+<p class="sub">Hackathon project · Results report template</p>
+<h1>Ball-wall collision: can a model draw the correct collision frame by frame, without writing code?</h1>
+<p class="sub">Task: the model directly outputs static SVG frames; the grader extracts the ball's coordinates by id, first checks hard constraints (wall penetration etc.), then compares soft accuracy (contact time, restitution ratio, trajectory).</p>
 
-<div class="banner">⚠ 本页所有成功率、失败占比、训练曲线和模型表现均为<strong>编造的占位数据</strong>,只用来预览最终报告的样子,不是任何实验的结果,不能引用,也不代表任何真实模型。例外:图 6 中的"标准答案"按真实的碰撞公式计算,其余两条曲线是假设的错误答案。</div>
+<div class="banner">⚠ Every success rate, failure share, training curve and model result on this page is <strong>made-up placeholder data</strong>, used only to preview what the final report will look like. It is not the result of any experiment, must not be cited, and does not represent any real model. Exception: the "ground truth" in Figure 6 is computed from the real collision formula; the other two curves are hypothetical wrong answers.</div>
 
-<h2>1. 摘要(占位)</h2>
+<h2>1. Summary (placeholder)</h2>
 <div class="kpis">
-  <div class="kpi"><div class="n">8% → 59%</div><div class="l">小模型 RL 前后的成功率(训练分布内)</div></div>
-  <div class="kpi"><div class="n">38% → 11%</div><div class="l">物理硬约束违规率(不含格式失败)</div></div>
-  <div class="kpi"><div class="n">30% → 2%</div><div class="l">格式失败率</div></div>
-  <div class="kpi"><div class="n">6% → 38%</div><div class="l">留出参数区间上的成功率</div></div>
+  <div class="kpi"><div class="n">8% → 59%</div><div class="l">Success rate of the small model before and after RL (in-distribution)</div></div>
+  <div class="kpi"><div class="n">38% → 11%</div><div class="l">Physics hard-constraint violation rate (excluding format failures)</div></div>
+  <div class="kpi"><div class="n">30% → 2%</div><div class="l">Format failure rate</div></div>
+  <div class="kpi"><div class="n">6% → 38%</div><div class="l">Success rate on the held-out parameter range</div></div>
 </div>
 <ul>
-  <li>前沿模型(占位的模型 A–D)的成功率从 74% 到 34%,小模型只有 8%。</li>
-  <li>所有模型在留出参数上的成功率都明显低于训练分布内。</li>
-  <li>RL 后,失败主要从"格式失败"和"穿墙"转为"轨迹偏差"和"反弹速度比偏差",即从严重错误变成精度问题。</li>
-  <li>留出变体(如加重力和地面)需要另一套生成器和评分器,2 小时内不做,本报告只评测留出参数。</li>
-  <li><b>结论的口径</b>:这只能说明模型在该格式下学会了正确执行碰撞的运动学,不能据此说"物理理解提升"。</li>
+  <li>Frontier models (placeholder Models A–D) range from 74% to 34% success; the small model reaches only 8%.</li>
+  <li>Every model's success rate on held-out parameters is clearly lower than in-distribution.</li>
+  <li>After RL, failures shift mainly from "Format failure" and "Wall penetration" to "Trajectory error" and "Restitution error", i.e. from severe errors to precision problems.</li>
+  <li>Held-out variants (e.g. adding gravity and a floor) need a separate generator and grader; they are out of scope for the 2-hour window, so this report evaluates held-out parameters only.</li>
+  <li><b>Scope of the conclusion</b>: this only shows that the model learned to execute collision kinematics correctly in this format; it does not support a claim of "improved physics understanding".</li>
 </ul>
 
-<h2>2. 任务与评分设置</h2>
-<p><b>任务:</b>球从左侧出发,水平匀速向右,撞到右侧的墙后反弹,恢复系数为 e。题目给出初速度 v、墙的位置、球半径、e、帧间隔 Δt 和画布比例尺;模型画 16 帧。每道题随机化 v、e、墙的位置、球半径,并满足:e ∈ [0.3, 0.95];接触前后各至少 4 帧;反弹后终点仍在画布内;撞墙时刻不落在采样帧上(误差 ±0.1Δt 内)。</p>
-<p><b>标准答案</b>(评分端计算):撞墙前 <code>x = x₀ + v·t</code>;球表面碰到墙的瞬间速度变为 <code>−e·v</code>。</p>
-<p><b>坐标约定:</b>用球的圆心 <code>cx</code>;题目给出的是墙<b>内侧面</b>的 x,圆心距墙面等于半径 r 时为接触。<b>墙的位置和球半径一律取题目参数</b>,评分器不读 SVG 里的值,只检查 SVG 里的值与参数一致(±1px),不一致算格式失败;球的 y 应保持恒定。解析只认 <code>circle#ball</code>,其余元素不参与评分。</p>
+<h2>2. Task and grading setup</h2>
+<p><b>Task:</b> the ball starts on the left, moves right at constant horizontal speed, hits the wall on the right and rebounds with coefficient of restitution e. The prompt gives the initial speed v, wall position, ball radius, e, frame interval Δt and canvas scale; the model draws 16 frames. Each task randomizes v, e, wall position and ball radius, subject to: e ∈ [0.3, 0.95]; at least 4 frames before and after contact; the end point after the rebound stays inside the canvas; the contact time does not fall on a sampled frame (within ±0.1Δt).</p>
+<p><b>Ground truth</b> (computed on the grading side): before contact <code>x = x₀ + v·t</code>; at the instant the ball surface touches the wall the velocity becomes <code>−e·v</code>.</p>
+<p><b>Coordinate convention:</b> use the ball's center <code>cx</code>; the prompt gives the x of the wall's <b>inner face</b>, and contact occurs when the center is at distance r (radius) from that face. <b>Wall position and ball radius are always taken from the task parameters</b>: the grader does not read them from the SVG, it only checks that the SVG values agree with the parameters (±1px); a mismatch counts as a format failure. The ball's y must stay constant. Parsing only recognizes <code>circle#ball</code>; other elements are not graded.</p>
 
-<h3>三个量怎么在离散帧上定义</h3>
+<h3>How the three quantities are defined on discrete frames</h3>
 <ul>
-  <li><b>入射速度</b>:对接触前的帧做最小二乘直线拟合,取斜率。</li>
-  <li><b>反弹速度</b>:对接触后的帧做同样的拟合,取斜率。</li>
-  <li><b>模型的接触时刻</b>:两条拟合直线与 x = x_墙 − r 的交点。不用"最靠近墙的那一帧"。</li>
-  <li><b>诊断量</b>:单独记录"第一帧反弹后的位置误差",它最能区分 e=1 的镜像反射和真正按 e 反弹。</li>
+  <li><b>Incoming speed</b>: least-squares line fit over the frames before contact; take the slope.</li>
+  <li><b>Rebound speed</b>: the same fit over the frames after contact; take the slope.</li>
+  <li><b>The model's contact time</b>: the intersection of the two fitted lines with x = x_wall − r. Not "the frame closest to the wall".</li>
+  <li><b>Diagnostic quantity</b>: separately record "position error of the first frame after rebound"; it best distinguishes an e=1 mirror reflection from a true rebound with e.</li>
 </ul>
 
-<h3>奖励:硬约束 + 软精度的字典序</h3>
-<pre>格式不对:            reward = 0
-违反任一硬约束:      reward = 0.2 × soft        (最高 0.2)
-满足全部硬约束:      reward = 0.3 + 0.7 × soft  (最低 0.3)
+<h3>Reward: lexicographic order of hard constraints then soft accuracy</h3>
+<pre>Bad format:                      reward = 0
+Any hard constraint violated:    reward = 0.2 × soft        (at most 0.2)
+All hard constraints satisfied:  reward = 0.3 + 0.7 × soft  (at least 0.3)
 
-soft ∈ [0,1],由撞墙时刻、反弹速度比、轨迹偏差三项算出(取几何平均或最小值),
-每项带容差带:误差在容差内记满分,超出才衰减。</pre>
-<p><b>硬约束</b>(任一违反即进入违规层):穿墙(任一帧球表面越过墙面超过容差);<b>未到墙就掉头</b>(最大 x 比标准答案在采样帧上的最大 x 小超过 0.5·v·Δt);撞墙后按自身轨迹的方向没有反向;反弹速度大于入射速度的 1.05 倍;帧间位移超过 1.5·v·Δt、y 漂移、出画布、全程静止。</p>
-<p><b>成功</b>(训练前固定):无硬约束违规,且撞墙时刻、反弹速度比、轨迹三项全部在容差内。由于容差内记满分,<b>成功等价于 reward 恰好为 1.0</b>:成功率是 reward 的阈值化,不是独立于 reward 的证据。独立验证需要另加人工或 VLM 抽查视频,或第二份独立实现的评分器。</p>
-<p><b>容差的设定顺序</b>:先定物理容差(如 e 的相对误差 10%、接触时刻 ±0.25Δt),再由它们推导轨迹容差,避免三项容差互相矛盾。</p>
+soft ∈ [0,1], computed from three terms: contact time, restitution ratio and trajectory error (geometric mean or minimum),
+each with a tolerance band: full score if the error is within tolerance, decay only beyond it.</pre>
+<p><b>Hard constraints</b> (violating any one enters the violation tier): wall penetration (in any frame the ball surface crosses the wall face by more than the tolerance); <b>turning back before reaching the wall</b> (maximum x smaller than the ground truth's maximum x on sampled frames by more than 0.5·v·Δt); no direction reversal after contact along its own trajectory; rebound speed greater than 1.05× the incoming speed; per-frame displacement over 1.5·v·Δt, y drift, leaving the canvas, static throughout.</p>
+<p><b>Success</b> (fixed before training): no hard-constraint violation, and all three terms (contact time, restitution ratio, trajectory) within tolerance. Because full score is given within tolerance, <b>success is equivalent to reward exactly 1.0</b>: the success rate is a thresholding of reward, not evidence independent of reward. Independent verification needs an additional manual or VLM spot check of the videos, or a second independently implemented grader.</p>
+<p><b>Order of setting tolerances</b>: first set the physical tolerances (e.g. 10% relative error on e, contact time ±0.25Δt), then derive the trajectory tolerance from them, so the three tolerances do not contradict each other.</p>
 
-<h3>失败类别(互斥,按优先级从上到下判定)</h3>
+<h3>Failure categories (mutually exclusive, decided by priority from top to bottom)</h3>
 <div class="tablewrap card" style="padding:0"><table>
-  <tr><th class="l">类别</th><th class="l">判定</th><th class="l">属于</th></tr>
-  <tr><td class="l">格式失败</td><td class="l">帧数不对、缺 id、有禁用元素、墙或半径与参数不一致、解析失败</td><td class="l">格式</td></tr>
-  <tr><td class="l">瞬移/越界/不动</td><td class="l">帧间位移超过 1.5·v·Δt、y 漂移、出画布、全程静止</td><td class="l">硬约束</td></tr>
-  <tr><td class="l">穿墙</td><td class="l">任一帧球表面越过墙面超过容差</td><td class="l">硬约束</td></tr>
-  <tr><td class="l">未到墙或未反弹</td><td class="l">没到墙就掉头;或按自身轨迹的方向撞墙后没有反向</td><td class="l">硬约束</td></tr>
-  <tr><td class="l">能量增加</td><td class="l">反弹速度大于入射速度的 1.05 倍</td><td class="l">硬约束</td></tr>
-  <tr><td class="l">撞墙时刻偏差</td><td class="l">超出容差</td><td class="l">软精度</td></tr>
-  <tr><td class="l">反弹速度比偏差</td><td class="l">与 e 的相对误差超出容差(如 e=1)</td><td class="l">软精度</td></tr>
-  <tr><td class="l">轨迹偏差</td><td class="l">其余通过,但整体轨迹超出容差</td><td class="l">软精度</td></tr>
-  <tr><td class="l">成功</td><td class="l">以上全部通过</td><td class="l">—</td></tr>
+  <tr><th class="l">Category</th><th class="l">Criterion</th><th class="l">Tier</th></tr>
+  <tr><td class="l">Format failure</td><td class="l">Wrong frame count, missing id, forbidden elements, wall or radius inconsistent with parameters, parse failure</td><td class="l">Format</td></tr>
+  <tr><td class="l">Teleport / out of bounds / static</td><td class="l">Per-frame displacement over 1.5·v·Δt, y drift, leaving the canvas, static throughout</td><td class="l">Hard constraint</td></tr>
+  <tr><td class="l">Wall penetration</td><td class="l">In any frame the ball surface crosses the wall face by more than the tolerance</td><td class="l">Hard constraint</td></tr>
+  <tr><td class="l">Did not reach wall or no rebound</td><td class="l">Turned back before reaching the wall; or no direction reversal after contact along its own trajectory</td><td class="l">Hard constraint</td></tr>
+  <tr><td class="l">Energy gain</td><td class="l">Rebound speed greater than 1.05× the incoming speed</td><td class="l">Hard constraint</td></tr>
+  <tr><td class="l">Contact-time error</td><td class="l">Beyond tolerance</td><td class="l">Soft accuracy</td></tr>
+  <tr><td class="l">Restitution error</td><td class="l">Relative error vs e beyond tolerance (e.g. e=1)</td><td class="l">Soft accuracy</td></tr>
+  <tr><td class="l">Trajectory error</td><td class="l">Everything else passes, but the overall trajectory is beyond tolerance</td><td class="l">Soft accuracy</td></tr>
+  <tr><td class="l">Success</td><td class="l">All of the above pass</td><td class="l">—</td></tr>
 </table></div>
-<p class="tag">"瞬移/不动"排在前面,是因为乱跳的输出会让反弹速度的估计失真,否则会被误归为"能量增加"。</p>
+<p class="tag">"Teleport / static" comes first because erratic outputs distort the rebound-speed estimate and would otherwise be misclassified as "Energy gain".</p>
 
-<h3>训练模型与环境(计划,尚未执行)</h3>
+<h3>Trained model and environment (planned, not yet executed)</h3>
 <div class="tablewrap card" style="padding:0"><table>
-  <tr><th class="l">项目</th><th class="l">设置</th></tr>
-  <tr><td class="l">被训练模型</td><td class="l">小型 Qwen 指令模型,1.5B–4B 量级(如 Qwen2.5-1.5B/3B-Instruct、Qwen3-1.7B/4B,以可下载版本和显存为准)</td></tr>
-  <tr><td class="l">微调方式</td><td class="l">LoRA + GRPO(TRL GRPOTrainer 或 Unsloth),不做全参</td></tr>
-  <tr><td class="l">采样</td><td class="l">每题 G=8 条,temperature≈1.0,最大输出约 2k token</td></tr>
-  <tr><td class="l">输出格式</td><td class="l">单个文本,内含 16 个 <code>&lt;g id="f0"&gt;…&lt;g id="f15"&gt;</code>,共享 defs,减少 token</td></tr>
-  <tr><td class="l">推理设定</td><td class="l">默认设定 A(只输出 SVG;若用 Qwen3,关闭 thinking);设定 B(允许先推理)作为后续对照</td></tr>
-  <tr><td class="l">冷启动</td><td class="l">只教格式(few-shot 或少量格式 SFT),轨迹数值不取标准答案,避免泄漏</td></tr>
-  <tr><td class="l">评测集</td><td class="l">固定 ≥200 题,训练分布内与留出参数各一份;每 10–20 步贪心解码评一次,图上画置信区间</td></tr>
-  <tr><td class="l">训练规模</td><td class="l">2 小时窗口内为几十步量级</td></tr>
-  <tr><td class="l">对照</td><td class="l">如有时间,评测 1 个前沿模型(仅评测,不训练)</td></tr>
+  <tr><th class="l">Item</th><th class="l">Setting</th></tr>
+  <tr><td class="l">Trained model</td><td class="l">Small Qwen instruct model, 1.5B–4B scale (e.g. Qwen2.5-1.5B/3B-Instruct, Qwen3-1.7B/4B, depending on downloadable versions and GPU memory)</td></tr>
+  <tr><td class="l">Fine-tuning method</td><td class="l">LoRA + GRPO (TRL GRPOTrainer or Unsloth), no full-parameter training</td></tr>
+  <tr><td class="l">Sampling</td><td class="l">G=8 completions per task, temperature≈1.0, max output about 2k tokens</td></tr>
+  <tr><td class="l">Output format</td><td class="l">A single text containing 16 <code>&lt;g id="f0"&gt;…&lt;g id="f15"&gt;</code> groups with shared defs, to reduce tokens</td></tr>
+  <tr><td class="l">Inference setting</td><td class="l">Default setting A (output SVG only; if using Qwen3, disable thinking); setting B (reasoning allowed first) as a later comparison</td></tr>
+  <tr><td class="l">Cold start</td><td class="l">Teach the format only (few-shot or a small format SFT); trajectory values are not taken from the ground truth, to avoid leakage</td></tr>
+  <tr><td class="l">Evaluation set</td><td class="l">Fixed ≥200 tasks, one in-distribution set and one held-out-parameter set; evaluate with greedy decoding every 10–20 steps, plot confidence intervals</td></tr>
+  <tr><td class="l">Training scale</td><td class="l">Tens of steps within the 2-hour window</td></tr>
+  <tr><td class="l">Comparison</td><td class="l">If time permits, evaluate 1 frontier model (evaluation only, no training)</td></tr>
 </table></div>
-<p class="tag">100 题时成功率的 95% 置信区间约 ±10 个百分点,几个点的差异无法区分,所以评测集不能太小。</p>
+<p class="tag">With 100 tasks the 95% confidence interval of the success rate is about ±10 percentage points, so differences of a few points cannot be distinguished; the evaluation set must not be too small.</p>
 
-<h2>3. 基线:各模型的成功率</h2>
-<h3>图 1:成功率(两种评测集)</h3>
+<h2>3. Baselines: success rate per model</h2>
+<h3>Figure 1: Success rate (two evaluation sets)</h3>
 <div class="card mock"><figure>
   <div id="legend1" class="legend"></div>
   <div id="chart1"></div>
-  <figcaption>"留出参数"指 e、速度超出训练范围。模型 E 为小型开源模型(计划使用 Qwen 系列,图中为占位),E+RL 为其 RL 训练后。</figcaption>
+  <figcaption>"Held-out parameters" means e and speed outside the training range. Model E is a small open-source model (planned: Qwen series; placeholder in the figure), E+RL is the same model after RL training.</figcaption>
 </figure></div>
 
-<h3>图 2:失败类别占比(训练分布内)</h3>
+<h3>Figure 2: Failure category shares (in-distribution)</h3>
 <div class="card mock"><figure>
   <div id="legend2" class="legend"></div>
   <div id="chart2"></div>
-  <figcaption>暖色为格式和硬约束类失败,蓝紫为软精度类失败,绿色为成功。强模型的剩余失败主要是软精度;弱模型有大量格式失败和穿墙。</figcaption>
+  <figcaption>Warm colors are format and hard-constraint failures, blue/purple are soft-accuracy failures, green is success. Strong models' remaining failures are mostly soft accuracy; weak models have many format failures and wall penetrations.</figcaption>
 </figure></div>
 
-<h2>4. RL 训练(模型 E)</h2>
-<h3>图 3:成功率与平均 reward 随训练步数</h3>
+<h2>4. RL training (Model E)</h2>
+<h3>Figure 3: Success rate and mean reward vs training step</h3>
 <div class="card mock"><figure>
   <div id="legend3" class="legend"></div>
   <div id="chart3"></div>
-  <figcaption>两者同向上升,但并不等同:违规样本变为合规样本时,reward 会先从 0.2 以下升到 0.3 以上,此时成功率还没动。真实训练中需说明曲线来自训练 batch 的在线采样,还是固定评测集的贪心解码。</figcaption>
+  <figcaption>Both rise together but are not equivalent: when a violating sample becomes compliant, reward first jumps from below 0.2 to above 0.3 while the success rate has not moved yet. In real training, state whether the curve comes from online sampling of the training batch or from greedy decoding on a fixed evaluation set.</figcaption>
 </figure></div>
 
-<h3>图 4:失败类别随训练步数的变化</h3>
+<h3>Figure 4: Failure categories vs training step</h3>
 <div class="card mock"><figure>
   <div id="legend4" class="legend"></div>
   <div id="chart4"></div>
-  <figcaption>成功率的上升由格式失败和硬约束类失败的下降支撑;软精度类失败的占比反而略有上升,因为原本更严重的失败被转化成了这几类。</figcaption>
+  <figcaption>The rise in success rate is driven by the drop in format failures and hard-constraint failures; the share of soft-accuracy failures rises slightly instead, because formerly more severe failures are converted into these categories.</figcaption>
 </figure></div>
 
-<h3>图 5:reward 的分布(RL 前 vs RL 后)</h3>
+<h3>Figure 5: Reward distribution (before vs after RL)</h3>
 <div class="card mock"><figure>
   <div id="legend5" class="legend"></div>
   <div id="chart5"></div>
-  <figcaption>成功样本的 reward 恰好为 1.0(容差内满分),因此全部落在最右一格。0.2 到 0.3 之间没有样本,是奖励公式(违规最高 0.2、合规最低 0.3)的构造结果,<b>不是实验发现</b>。</figcaption>
+  <figcaption>Successful samples have reward exactly 1.0 (full score within tolerance), so they all fall in the rightmost bin. The absence of samples between 0.2 and 0.3 is a construction of the reward formula (violations at most 0.2, compliant at least 0.3), <b>not an experimental finding</b>.</figcaption>
 </figure></div>
 
-<h3>表 1:RL 前后(模型 E)</h3>
+<h3>Table 1: Before and after RL (Model E)</h3>
 <div class="tablewrap card mock" style="padding:0"><table>
-  <tr><th class="l">指标</th><th>RL 前</th><th>RL 后</th><th>变化</th></tr>
-  <tr><td class="l">成功率(训练分布内)</td><td>8%</td><td>59%</td><td class="good">+51 pt</td></tr>
-  <tr><td class="l">成功率(留出参数)</td><td>6%</td><td>38%</td><td class="good">+32 pt</td></tr>
-  <tr><td class="l">格式失败率</td><td>30%</td><td>2%</td><td class="good">−28 pt</td></tr>
-  <tr><td class="l">硬约束违规率(占全部样本,不含格式失败)</td><td>38%</td><td>11%</td><td class="good">−27 pt</td></tr>
-  <tr><td class="l">P(格式通过)</td><td>70%</td><td>98%</td><td class="good">+28 pt</td></tr>
-  <tr><td class="l">P(硬约束通过 | 格式通过)</td><td>46%</td><td>89%</td><td class="good">+43 pt</td></tr>
-  <tr><td class="l">P(成功 | 硬约束通过)</td><td>25%</td><td>68%</td><td class="good">+43 pt</td></tr>
+  <tr><th class="l">Metric</th><th>Before RL</th><th>After RL</th><th>Change</th></tr>
+  <tr><td class="l">Success rate (in-distribution)</td><td>8%</td><td>59%</td><td class="good">+51 pt</td></tr>
+  <tr><td class="l">Success rate (held-out parameters)</td><td>6%</td><td>38%</td><td class="good">+32 pt</td></tr>
+  <tr><td class="l">Format failure rate</td><td>30%</td><td>2%</td><td class="good">−28 pt</td></tr>
+  <tr><td class="l">Hard-constraint violation rate (of all samples, excluding format failures)</td><td>38%</td><td>11%</td><td class="good">−27 pt</td></tr>
+  <tr><td class="l">P(format pass)</td><td>70%</td><td>98%</td><td class="good">+28 pt</td></tr>
+  <tr><td class="l">P(hard constraints pass | format pass)</td><td>46%</td><td>89%</td><td class="good">+43 pt</td></tr>
+  <tr><td class="l">P(success | hard constraints pass)</td><td>25%</td><td>68%</td><td class="good">+43 pt</td></tr>
 </table></div>
-<p class="tag">后三行是链式分解,三项之积等于成功率(RL 前 0.70×0.46×0.25≈8%,RL 后 0.98×0.89×0.68≈59%)。条件概率的分母在 RL 前后是不同的样本集合,比较时有选择偏差,所以只能说提升与"学会物理"<b>一致</b>,不能说"证明"。</p>
+<p class="tag">The last three rows are a chain decomposition; their product equals the success rate (before RL 0.70×0.46×0.25≈8%, after RL 0.98×0.89×0.68≈59%). The denominators of the conditional probabilities are different sample sets before and after RL, so the comparison has selection bias; one can only say the improvement is <b>consistent</b> with "learning the physics", not that it "proves" it.</p>
 
-<h2>5. 案例与评分器自检</h2>
-<h3>图 6:球心 x 坐标随帧变化(v = 400 px/s,e = 0.6,球半径 20,墙内侧 x = 900)</h3>
+<h2>5. Cases and grader self-check</h2>
+<h3>Figure 6: Ball center x vs frame (v = 400 px/s, e = 0.6, ball radius 20, wall inner face x = 900)</h3>
 <div class="card"><figure>
   <div id="legend6" class="legend"></div>
   <div id="chart6"></div>
-  <figcaption>"标准答案"按真实碰撞公式计算;"e=1 的反弹"和"穿过墙"是假设的两种典型错误答案,不是真实模型输出。球心撞墙时位于 x = 880。撞墙时刻 t=1.95s 落在第 7 帧(x=800)和第 8 帧(x=868)之间,没有任何一帧恰好贴墙,这是接触时刻必须用拟合线交点定义的原因。</figcaption>
+  <figcaption>"Ground truth" is computed from the real collision formula; "e=1 rebound" and "through the wall" are two hypothetical typical wrong answers, not real model outputs. The ball center is at x = 880 at contact. The contact time t=1.95s falls between frame 7 (x=800) and frame 8 (x=868); no frame is exactly at the wall, which is why the contact time must be defined by the intersection of fitted lines.</figcaption>
 </figure></div>
 
-<h3>表 2:评分器自检(手算估计)</h3>
+<h3>Table 2: Grader self-check (hand-computed estimates)</h3>
 <div class="tablewrap card" style="padding:0"><table>
-  <tr><th class="l">答案</th><th class="l">硬约束</th><th>soft</th><th>reward</th></tr>
-  <tr><td class="l">完全正确</td><td class="l">通过</td><td>1.0</td><td>1.0</td></tr>
-  <tr><td class="l">e = 0.65(真值 0.6),其余正确</td><td class="l">通过</td><td>取决于容差</td><td>待自检确定</td></tr>
-  <tr><td class="l">e = 1(没有能量损失)</td><td class="l">通过</td><td>约 0.3</td><td>约 0.5</td></tr>
-  <tr><td class="l">轨迹很准但末帧穿墙 4 px</td><td class="l">违反</td><td>约 0.9</td><td>约 0.18</td></tr>
-  <tr><td class="l">球直接穿过墙</td><td class="l">违反</td><td>低</td><td>约 0.02</td></tr>
-  <tr><td class="l">提前掉头,不碰墙</td><td class="l">违反(未到墙)</td><td>低</td><td>≤ 0.2</td></tr>
-  <tr><td class="l">反弹后比入射更快</td><td class="l">违反</td><td>中</td><td>约 0.1</td></tr>
-  <tr><td class="l">球不动</td><td class="l">违反</td><td>0</td><td>0</td></tr>
+  <tr><th class="l">Answer</th><th class="l">Hard constraints</th><th>soft</th><th>reward</th></tr>
+  <tr><td class="l">Fully correct</td><td class="l">Pass</td><td>1.0</td><td>1.0</td></tr>
+  <tr><td class="l">e = 0.65 (true value 0.6), otherwise correct</td><td class="l">Pass</td><td>Depends on tolerance</td><td>To be determined by self-check</td></tr>
+  <tr><td class="l">e = 1 (no energy loss)</td><td class="l">Pass</td><td>About 0.3</td><td>About 0.5</td></tr>
+  <tr><td class="l">Accurate trajectory but last frame penetrates the wall by 4 px</td><td class="l">Violated</td><td>About 0.9</td><td>About 0.18</td></tr>
+  <tr><td class="l">Ball passes straight through the wall</td><td class="l">Violated</td><td>Low</td><td>About 0.02</td></tr>
+  <tr><td class="l">Turns back early, never touches the wall</td><td class="l">Violated (did not reach wall)</td><td>Low</td><td>≤ 0.2</td></tr>
+  <tr><td class="l">Faster after rebound than before</td><td class="l">Violated</td><td>Medium</td><td>About 0.1</td></tr>
+  <tr><td class="l">Ball does not move</td><td class="l">Violated</td><td>0</td><td>0</td></tr>
 </table></div>
-<p class="tag">表 2 是手算估计,不是评分器实际输出。"e=0.65"一行不写数字:反弹速度只差 20 px/s,但约 1.8 s 后位置相差约 36 px,是否在轨迹容差内取决于容差的设定。</p>
+<p class="tag">Table 2 contains hand-computed estimates, not actual grader output. The "e=0.65" row gives no number: the rebound speed differs by only 20 px/s, but after about 1.8 s the position differs by about 36 px; whether that is within the trajectory tolerance depends on how the tolerance is set.</p>
 
-<h3>表 3:笨策略基线(预期,待实测)</h3>
+<h3>Table 3: Dumb-strategy baselines (expected, to be measured)</h3>
 <div class="tablewrap card" style="padding:0"><table>
-  <tr><th class="l">不用模型的固定策略</th><th class="l">应被判为</th><th class="l">用来检验什么</th></tr>
-  <tr><td class="l">总按 e=1 做镜像反射</td><td class="l">仅当真实 e 接近 1 时才可能成功</td><td class="l">容差是否过松、e 的取值范围是否合理</td></tr>
-  <tr><td class="l">在正确时刻掉头,但固定 e=0.5</td><td class="l">仅当真实 e 在 0.5 附近才可能成功</td><td class="l">反弹速度比的容差是否过松</td></tr>
-  <tr><td class="l">提前掉头,不碰墙</td><td class="l">硬约束违规(未到墙)</td><td class="l">是否堵住了"保守策略"漏洞</td></tr>
-  <tr><td class="l">球不动 / 穿过墙 / 随机位置</td><td class="l">硬约束违规或格式失败</td><td class="l">基本的区分度</td></tr>
+  <tr><th class="l">Fixed strategy without a model</th><th class="l">Should be judged as</th><th class="l">What it tests</th></tr>
+  <tr><td class="l">Always mirror-reflect with e=1</td><td class="l">Can succeed only when the true e is close to 1</td><td class="l">Whether the tolerance is too loose and the range of e is reasonable</td></tr>
+  <tr><td class="l">Turns back at the correct time but with fixed e=0.5</td><td class="l">Can succeed only when the true e is near 0.5</td><td class="l">Whether the restitution-ratio tolerance is too loose</td></tr>
+  <tr><td class="l">Turns back early, never touches the wall</td><td class="l">Hard-constraint violation (did not reach wall)</td><td class="l">Whether the "conservative strategy" loophole is closed</td></tr>
+  <tr><td class="l">Ball does not move / passes through the wall / random positions</td><td class="l">Hard-constraint violation or format failure</td><td class="l">Basic discrimination</td></tr>
 </table></div>
-<p class="tag">这些策略不需要任何训练,直接喂给评分器即可。如果某个笨策略在大量题目上被判成功,说明评分器有漏洞,应当先修好再启动 RL。</p>
+<p class="tag">These strategies need no training; feed them straight to the grader. If some dumb strategy is judged successful on many tasks, the grader has a loophole that must be fixed before starting RL.</p>
 
-<h2>6. 相关工作与讨论</h2>
-<h3>相关工作与定位(部分未核实)</h3>
+<h2>6. Related work and discussion</h2>
+<h3>Related work and positioning (partly unverified)</h3>
 <ul>
-  <li>SimuScene(arXiv 2602.10840):模型写代码,VLM 看视频判定性问题,GRPO 训练。本工作不同于它的地方是:模型直接输出逐帧状态而非代码;奖励由确定性评分器给出。</li>
-  <li>VisPhyWorld(2602.13294):已核对正文。SVG 与 Manim 仅在 Figure 1 和第 3.4 节被定性提及,称为"基于脚本的后端";论文<b>没有说明</b>其输出是代码还是直接的 SVG 标记,也没有 SVG 的定量结果,主实验只评测 Three.js 与 P5.js。因此无法据此判断"直接画 SVG"是否已有人做过,本工作不据此宣称新颖性。</li>
-  <li>RL with Verifiable Physics(2607.10474)、SVG-LLMs 多奖励 RL(2603.16189)、GAUGE(2608.05948):<b>只读了搜索摘要,未读正文</b>,需核实是否与本工作冲突。</li>
-  <li>定位:无代码、直接输出状态设定下,用确定性评分器做 RLVR 的小规模可行性演示。不声称"首个"。</li>
-  <li>一维场景下 SVG 只是坐标的包装,等价于输出一个坐标列表(如 <code>{"ball_x":[…]}</code>)。SVG 的价值在于可直接合成视频做人工或 VLM 交叉验证,并能扩展到多物体。<b>SVG 与坐标列表的差异未做对照实验(局限,记为下一步)</b>:同题、同评分器,只改输出格式,比较成功率和格式失败率。</li>
+  <li>SimuScene (arXiv 2602.10840): the model writes code, a VLM watches the video to judge qualitative questions, GRPO training. This work differs in that the model outputs per-frame state directly rather than code, and the reward is given by a deterministic grader.</li>
+  <li>VisPhyWorld (2602.13294): main text checked. SVG and Manim are only mentioned qualitatively in Figure 1 and Section 3.4 as "script-based backends"; the paper <b>does not state</b> whether the output is code or direct SVG markup, and gives no quantitative SVG results; the main experiments evaluate only Three.js and P5.js. So it cannot be used to judge whether "drawing SVG directly" has been done before, and this work makes no novelty claim based on it.</li>
+  <li>RL with Verifiable Physics (2607.10474), multi-reward RL for SVG-LLMs (2603.16189), GAUGE (2608.05948): <b>only the search abstracts were read, not the full text</b>; need to verify whether they conflict with this work.</li>
+  <li>Positioning: a small-scale feasibility demo of RLVR with a deterministic grader in a no-code, direct-state-output setting. No claim of being "first".</li>
+  <li>In the one-dimensional scene SVG is just a wrapper around coordinates, equivalent to outputting a coordinate list (e.g. <code>{"ball_x":[…]}</code>). The value of SVG is that it can be rendered directly to video for manual or VLM cross-validation, and extends to multiple objects. <b>The SVG vs coordinate-list comparison was not run (limitation, recorded as next step)</b>: same tasks, same grader, only the output format changes; compare success rate and format failure rate.</li>
 </ul>
-<h3>讨论</h3>
+<h3>Discussion</h3>
 <ul>
-  <li><b>能说明什么</b>:在受控的球撞墙场景里,模型直接输出状态的物理一致性如何;RL 能否降低严重违规并提高成功率,以及提升是否迁移到留出参数。</li>
-  <li><b>不能说明什么</b>:不能证明"物理理解";题目给了 v、e、x₀、Δt,答案是闭式公式;场景理想化(单球、刚性墙、无噪声),不能推广到真实视频。</li>
-  <li><b>局限</b>:题型少;硬约束与软精度的划分、容差大小是人为设定的;成功等价于 reward=1.0,不是独立证据;留出变体未做;SVG 与坐标列表的对照未做。</li>
-  <li><b>需要继续核实</b>:评分器自检(表 2、表 3)的实际结果;连续奖励与二元奖励的对比消融;reward 上升而成功率不涨时的诊断(看图 4)。</li>
+  <li><b>What it can show</b>: in the controlled ball-wall scene, how physically consistent the model's direct state output is; whether RL can reduce severe violations and raise the success rate, and whether the improvement transfers to held-out parameters.</li>
+  <li><b>What it cannot show</b>: it cannot prove "physics understanding"; the prompt gives v, e, x₀, Δt and the answer is a closed-form formula; the scene is idealized (single ball, rigid wall, no noise) and does not generalize to real video.</li>
+  <li><b>Limitations</b>: few task types; the split between hard constraints and soft accuracy, and the tolerance sizes, are set by hand; success is equivalent to reward=1.0 and is not independent evidence; held-out variants not done; SVG vs coordinate-list comparison not done.</li>
+  <li><b>Still to verify</b>: actual results of the grader self-check (Tables 2 and 3); ablation comparing continuous vs binary reward; diagnosis when reward rises but success rate does not (see Figure 4).</li>
 </ul>
 
 <footer>
-  <p>换成真实结果:替换 <code>&lt;script&gt;</code> 中的 <code>DATA</code> 对象(模型对比)和 <code>RL</code> 对象(训练前后的失败类别占比)。图 3–5 由这些占比推导,表 1 需要手动更新。</p>
+  <p>To switch to real results: replace the <code>DATA</code> object (model comparison) and the <code>RL</code> object (failure category shares before and after training) in the <code>&lt;script&gt;</code>. Figures 3–5 are derived from these shares; Table 1 must be updated by hand.</p>
 </footer>
 </div>
 
 <script>
-const CATS = ["格式失败","瞬移/越界/不动","穿墙","未到墙或未反弹","能量增加","撞墙时刻偏差","反弹速度比偏差","轨迹偏差","成功"];
+const CATS = ["Format failure","Teleport / out of bounds / static","Wall penetration","Did not reach wall or no rebound","Energy gain","Contact-time error","Restitution error","Trajectory error","Success"];
 const CAT_COL = i => `var(--k${i+1})`;
-const CAT_REWARD = [0,.05,.08,.08,.10,.62,.72,.78,1.0]; // 各类别的典型 reward(占位);成功 = 1.0
+const CAT_REWARD = [0,.05,.08,.08,.10,.62,.72,.78,1.0]; // typical reward per category (placeholder); success = 1.0
 
 const DATA = {
-  models: ["模型 A","模型 B","模型 C","模型 D","模型 E(小型)","模型 E + RL"],
+  models: ["Model A","Model B","Model C","Model D","Model E (small)","Model E + RL"],
   success: {
-    sets:["训练分布内","留出参数"],
+    sets:["In-distribution","Held-out parameters"],
     v:[[.74,.58],[.65,.47],[.52,.36],[.34,.20],[.08,.06],[.59,.38]]
   },
   breakdown:[
@@ -296,11 +296,11 @@ function axes(f, xticks, xpos, ymin, ymax, ystep, xlabel, ylabel, fmt){
 const pct = v => Math.round(v*100)+"%";
 const mount = (id,svg)=>document.getElementById(id).appendChild(svg);
 
-/* 图1:成功率分组柱 */
+/* Figure 1: grouped bars of success rate */
 (function(){
   const f = frame(760,340,{l:52,r:16,t:16,b:70});
   const n = DATA.models.length, gw = f.W/n, xp = i => f.m.l + gw*(i+.5);
-  axes(f, DATA.models, xp, 0, 1, .2, null, "成功率", pct);
+  axes(f, DATA.models, xp, 0, 1, .2, null, "Success rate", pct);
   const k = DATA.success.sets.length, bw = Math.min(30, gw/(k+1));
   DATA.success.v.forEach((row,i)=> row.forEach((v,j)=>{
     const x = xp(i) + (j-(k-1)/2)*(bw+3) - bw/2, h = v*f.H, y = f.m.t+f.H-h;
@@ -310,11 +310,11 @@ const mount = (id,svg)=>document.getElementById(id).appendChild(svg);
   mount("chart1", f.svg); legend("legend1", DATA.success.sets);
 })();
 
-/* 图2:各模型失败类别堆叠 */
+/* Figure 2: stacked failure categories per model */
 (function(){
   const f = frame(760,340,{l:52,r:16,t:16,b:70});
   const n = DATA.models.length, gw = f.W/n, bw = Math.min(70, gw*.62), xp = i => f.m.l + gw*(i+.5);
-  axes(f, DATA.models, xp, 0, 1, .25, null, "占比", pct);
+  axes(f, DATA.models, xp, 0, 1, .25, null, "Share", pct);
   DATA.breakdown.forEach((row,i)=>{
     let acc = 0;
     row.forEach((v,k)=>{
@@ -327,21 +327,21 @@ const mount = (id,svg)=>document.getElementById(id).appendChild(svg);
   mount("chart2", f.svg); legend("legend2", CATS, CAT_COL);
 })();
 
-/* RL 数据推导 */
+/* RL data derivation */
 const steps = Array.from({length:RL.steps/5+1},(_,i)=>i*5);
 const dist = t => RL.start.map((a,k)=> a + (RL.end[k]-a)*(1-Math.exp(-t/RL.tau)));
 let _s = 7; const rnd = () => (_s = (_s*16807)%2147483647)/2147483647 - .5;
 const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
 
-/* 图3 */
+/* Figure 3 */
 (function(){
   const f = frame(760,320,{l:52,r:16,t:16,b:56});
   const xp = i => f.m.l + i/RL.steps*f.W, yp = v => f.m.t + f.H - Math.max(0,Math.min(1,v))*f.H;
-  axes(f, ["0","50","100","150"], i=>f.m.l+i*50/RL.steps*f.W, 0, 1, .2, "训练步数", "成功率 / 平均 reward", pct);
+  axes(f, ["0","50","100","150"], i=>f.m.l+i*50/RL.steps*f.W, 0, 1, .2, "Training step", "Success rate / mean reward", pct);
   const series = [
-    {name:"成功率(训练分布内)", v:steps.map(t=>dist(t)[8]+rnd()*.03)},
-    {name:"成功率(留出参数)", v:steps.map(t=>RL.heldStart+(RL.heldEnd-RL.heldStart)*(1-Math.exp(-t/60))+rnd()*.03)},
-    {name:"平均 reward(训练分布内)", v:steps.map(t=>meanReward(dist(t))+rnd()*.03)}
+    {name:"Success rate (in-distribution)", v:steps.map(t=>dist(t)[8]+rnd()*.03)},
+    {name:"Success rate (held-out parameters)", v:steps.map(t=>RL.heldStart+(RL.heldEnd-RL.heldStart)*(1-Math.exp(-t/60))+rnd()*.03)},
+    {name:"Mean reward (in-distribution)", v:steps.map(t=>meanReward(dist(t))+rnd()*.03)}
   ];
   series.forEach((s,k)=>{
     const d = s.v.map((v,i)=>`${i?"L":"M"}${xp(steps[i]).toFixed(1)},${yp(v).toFixed(1)}`).join(" ");
@@ -350,11 +350,11 @@ const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
   mount("chart3", f.svg); legend("legend3", series.map(s=>s.name));
 })();
 
-/* 图4 */
+/* Figure 4 */
 (function(){
   const f = frame(760,320,{l:52,r:16,t:16,b:56});
   const xp = t => f.m.l + t/RL.steps*f.W, yp = v => f.m.t + f.H - v*f.H;
-  axes(f, ["0","50","100","150"], i=>f.m.l+i*50/RL.steps*f.W, 0, 1, .25, "训练步数", "占比", pct);
+  axes(f, ["0","50","100","150"], i=>f.m.l+i*50/RL.steps*f.W, 0, 1, .25, "Training step", "Share", pct);
   const D = steps.map(dist);
   const cum = D.map(d=>{ let a=0; return d.map(v=>(a+=v)); });
   for (let k=CATS.length-1; k>=0; k--){
@@ -365,7 +365,7 @@ const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
   mount("chart4", f.svg); legend("legend4", CATS, CAT_COL);
 })();
 
-/* 图5:reward 分布(模拟采样);成功样本 reward = 1.0 */
+/* Figure 5: reward distribution (simulated sampling); successful samples have reward = 1.0 */
 (function(){
   const N = 3000, bins = 20;
   const rangeOf = k => k==0?[0,0.0001]: k<=4?[.02,.2] : k<=7?[.35,.85] : [.9999,1.0];
@@ -382,18 +382,18 @@ const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
   const H0 = hist(RL.start), H1 = hist(RL.end);
   const f = frame(760,320,{l:52,r:16,t:16,b:56});
   const bw = f.W/bins, ymax = .7;
-  axes(f, ["0","0.25","0.5","0.75","1.0"], i=>f.m.l+i*f.W/4, 0, ymax, .1, "reward", "样本占比", pct);
+  axes(f, ["0","0.25","0.5","0.75","1.0"], i=>f.m.l+i*f.W/4, 0, ymax, .1, "reward", "Share of samples", pct);
   [H0,H1].forEach((h,s)=> h.forEach((v,i)=>{
     const hh = Math.min(v,ymax)/ymax*f.H, w = bw/2-1;
     f.svg.appendChild(el("rect",{x:f.m.l+i*bw+(s?bw/2:0)+.5,y:f.m.t+f.H-hh,width:w,height:hh,fill:col(s?2:1)}));
   }));
   const x = v => f.m.l+v*f.W;
-  f.svg.appendChild(el("text",{x:x(1)-6,y:f.m.t+14,"font-size":11,"text-anchor":"end"},"成功 = reward 1.0 →"));
-  f.svg.appendChild(el("text",{x:x(.2)-4,y:f.m.t+14,"font-size":11,"text-anchor":"end"},"← 违规样本(≤0.2)"));
-  mount("chart5", f.svg); legend("legend5", ["RL 前","RL 后"], i=>col(i?2:1));
+  f.svg.appendChild(el("text",{x:x(1)-6,y:f.m.t+14,"font-size":11,"text-anchor":"end"},"Success = reward 1.0 →"));
+  f.svg.appendChild(el("text",{x:x(.2)-4,y:f.m.t+14,"font-size":11,"text-anchor":"end"},"← Violating samples (≤0.2)"));
+  mount("chart5", f.svg); legend("legend5", ["Before RL","After RL"], i=>col(i?2:1));
 })();
 
-/* 图6:真实碰撞公式 + 两种假设错误答案 */
+/* Figure 6: real collision formula + two hypothetical wrong answers */
 (function(){
   const x0=100, v=400, e=.6, dt=.25, N=16, xc=880, tc=(xc-x0)/v;
   const truth = t => t<=tc ? x0+v*t : xc - e*v*(t-tc);
@@ -401,9 +401,9 @@ const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
   const through = t => x0+v*t;
   const f = frame(760,340,{l:52,r:16,t:16,b:56});
   const xp = k => f.m.l + 20 + k*(f.W-40)/(N-1), yp = x => f.m.t + f.H - Math.min(1200,x)/1200*f.H;
-  axes(f, ["0","5","10","15"], i=>xp(i*5), 0, 1200, 200, "帧序号 k(t = 0.25·k s)", "球心 x (px)", y=>String(Math.round(y)));
+  axes(f, ["0","5","10","15"], i=>xp(i*5), 0, 1200, 200, "Frame index k (t = 0.25·k s)", "Ball center x (px)", y=>String(Math.round(y)));
   f.svg.appendChild(el("line",{x1:f.m.l,x2:f.m.l+f.W,y1:yp(900),y2:yp(900),stroke:"var(--muted)","stroke-width":3}));
-  f.svg.appendChild(el("text",{x:f.m.l+f.W-4,y:yp(900)-6,"text-anchor":"end","font-size":11},"墙内侧 x = 900"));
+  f.svg.appendChild(el("text",{x:f.m.l+f.W-4,y:yp(900)-6,"text-anchor":"end","font-size":11},"Wall inner face x = 900"));
   const line = (fn,k,dash) => {
     const pts = Array.from({length:N},(_,i)=>[xp(i), yp(fn(i*dt))]);
     f.svg.appendChild(el("path",{d:pts.map((p,i)=>`${i?"L":"M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" "),fill:"none",stroke:col(k),"stroke-width":2.4,"stroke-dasharray":dash||""}));
@@ -411,7 +411,7 @@ const meanReward = d => d.reduce((s,v,k)=> s+v*CAT_REWARD[k], 0);
   };
   line(truth,2); line(elastic,1,"6 4"); line(through,3,"2 4");
   mount("chart6", f.svg);
-  legend("legend6", ["标准答案(e = 0.6)","e = 1 的反弹(假设答案)","穿过墙(假设答案,超出 1200 的部分被截断)"], i=>col([2,1,3][i]));
+  legend("legend6", ["Ground truth (e = 0.6)","e = 1 rebound (hypothetical answer)","Through the wall (hypothetical answer; part above 1200 is clipped)"], i=>col([2,1,3][i]));
 })();
 </script>
 </body>
